@@ -1,22 +1,11 @@
-//#include "utils.h"
-
-//void testQnameConvert() {
-//    unsigned char qname1[512];
-//    unsigned char name[512];
-//    strcpy(name, "www.baidu.com");
-//    QnameConvert(qname1, name);
-//    printf("%s", qname1);
-//}
 #include <stdio.h>
+#include <signal.h>
 #include "writetun/writetun.h"
 #include "tun/tun.h"
-#include "read_dns/read_dns.h"
+#include "readdns/readdns.h"
 #include "utils/utils.h"
 
 int main(int argc, char *argv[]) {
-    // TODO: add arg processing.
-    // arg1: dns server
-    // arg2: host name
     if (argc < 3) {
         printf("Usage: %s [dns server ip] [hostname]\n",argv[0]);
         return 1;
@@ -30,14 +19,16 @@ int main(int argc, char *argv[]) {
     strcpy(src_ip,"100.100.100.1");
     strcpy(snat_ip,"100.100.100.1");
 
+    // ctrl+c to exit
+    signal(SIGINT,sighandler);
+
     tun_fd = init_tun(tun_name,tun_ip,dns_server,snat_ip);
 
     for(;;) {
         writetun(hostname,src_ip,dns_server,tun_fd,tun_name);
         read_dns(tun_fd,tun_name);
+        sleep(1);
     }
+
 }
 
-//int main() {
-//    writetuntest();
-//}

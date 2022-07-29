@@ -4,23 +4,28 @@
 #include "writetun.h"
 
 void writetun(char *hostname, char *src_ip, char *dest_ip, int tun_fd, char *tun_name) {
-    int nwrite;
+    int nwrite,length;
     unsigned char buffer[PCKT_LEN];
     unsigned char name[512];
+    unsigned short int packetLength;
+    char* qname;
+    struct IPHeader *ip;
+    struct UdpHeader *udp;
+    struct DnsHeader *dns;
+    struct DnsQuestion *dnsq;
 
-    struct IPHeader *ip = (struct IPHeader *) buffer;
-    struct UdpHeader *udp = (struct UdpHeader *) (buffer + sizeof(struct IPHeader));
-    struct DnsHeader *dns = (struct DnsHeader *) (buffer + sizeof(struct IPHeader) + sizeof(struct UdpHeader));
-    char *qname = (buffer + sizeof(struct IPHeader) + sizeof(struct UdpHeader) + sizeof(struct DnsHeader));
+    ip = (struct IPHeader *) buffer;
+    udp = (struct UdpHeader *) (buffer + sizeof(struct IPHeader));
+    dns = (struct DnsHeader *) (buffer + sizeof(struct IPHeader) + sizeof(struct UdpHeader));
+    qname = (buffer + sizeof(struct IPHeader) + sizeof(struct UdpHeader) + sizeof(struct DnsHeader));
     memset(buffer, 0, PCKT_LEN);
     strcpy(name, hostname);
     QnameConvert(qname, name);
-    int length = strlen(qname) + 1;
-    struct DnsQuestion *dnsq = (struct DnsQuestion *) (qname + length);
-    unsigned short int packetLength = (sizeof(struct IPHeader) + sizeof(struct UdpHeader) + sizeof(struct DnsHeader) +
+    length = strlen(qname) + 1;
+    dnsq = (struct DnsQuestion *) (qname + length);
+    packetLength = (sizeof(struct IPHeader) + sizeof(struct UdpHeader) + sizeof(struct DnsHeader) +
                                        length +
                                        sizeof(struct DnsQuestion));
-
     // ip header
     ip->iph_ihl = 5;
     ip->iph_ver = 4;
@@ -49,11 +54,10 @@ void writetun(char *hostname, char *src_ip, char *dest_ip, int tun_fd, char *tun
     dnsq->qtype = htons(1);
     dnsq->qclass = htons(1);
 
-    nwrite = write(tun_fd, buffer, sizeof(buffer));
+    nwrite = write(tun_fd, buffer, 1500);
     if (nwrite < 0) {
         perror("Writing from interface");
     }
-    sleep(1);
 
     printf("Write %d bytes from device %s\n", nwrite, tun_name);
 

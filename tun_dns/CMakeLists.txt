@@ -4,7 +4,7 @@ project(tun_app C)
 set(CMAKE_C_STANDARD 99)
 
 add_executable(tun_app main.c utils/utils.c utils/utils.h tun/tun.c tun/tun.h
-            writetun/writetun.c writetun/writetun.h read_dns/read_dns.h read_dns/read_dns.c
+            writetun/writetun.c writetun/writetun.h readdns/readdns.h readdns/readdns.c
         )
 
 target_link_libraries(tun_app "-lpthread")

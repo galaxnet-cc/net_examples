@@ -70,7 +70,7 @@ struct DnsAnswer {
 #pragma pack(pop)
 
 struct RES_RECORD {
-    unsigned char *rname;
+    unsigned char* rname;
     struct DnsAnswer *answer;
     unsigned char *rdata;
 };
@@ -78,14 +78,18 @@ struct RES_RECORD {
 
 int tun_alloc(char *dev, int flags);
 
+void writetuntest();
+
+void readtun();
+
 unsigned short csum(unsigned short *buf, int nwords);
 
 void QnameConvert(unsigned char *qname, unsigned char *host);
 
-u_char *ReadName(unsigned char *reader, unsigned char *buffer, int *count);
+void testQnameConvert();
 
-u_char *ReadName2(unsigned char *reader, unsigned char *buffer, int *count);
+u_char* ReadName(unsigned char* reader,unsigned char* buffer,int* count);
 
-void sighandler(int signum);
+u_char* ReadName2(unsigned char* reader,unsigned char* buffer,int* count);
 
 #endif //DNS_UTILS_H

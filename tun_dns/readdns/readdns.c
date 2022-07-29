@@ -1,7 +1,7 @@
 //
 // Created by galaxnet on 22-7-28.
 //
-#include "read_dns.h"
+#include "readdns.h"
 
 void read_dns(int tun_fd, char *tun_name) {
     unsigned char buffer2[PCKT_LEN];
@@ -10,10 +10,16 @@ void read_dns(int tun_fd, char *tun_name) {
     int nread, stop;
     struct in_addr src_ip, dest_ip;
     struct sockaddr_in ans_ip;
+    struct IPHeader *ip2;
+    struct UdpHeader *udp2;
+    struct DnsHeader *dns2;
+    char *start;
+    char token[64];
+
     // 读取dns response
-    struct IPHeader *ip2 = (struct IPHeader *) buffer2;
-    struct UdpHeader *udp2 = (struct UdpHeader *) (buffer2 + sizeof(struct IPHeader));
-    struct DnsHeader *dns2 = (struct DnsHeader *) (buffer2 + sizeof(struct IPHeader) + sizeof(struct UdpHeader));
+    ip2 = (struct IPHeader *) buffer2;
+    udp2 = (struct UdpHeader *) (buffer2 + sizeof(struct IPHeader));
+    dns2 = (struct DnsHeader *) (buffer2 + sizeof(struct IPHeader) + sizeof(struct UdpHeader));
 
     // 将读取到的response存入buffer2
     nread = read(tun_fd, buffer2, sizeof(buffer2));
@@ -21,30 +27,16 @@ void read_dns(int tun_fd, char *tun_name) {
         perror("Reading from interface");
     }
 
-    printf("Read %d bytes from device %s\n", nread, tun_name);
-
     if (ntohs(udp2->udph_srcport) != 53) {
         return;
     }
 
-
-    char *start = (buffer2 + sizeof(struct IPHeader) + sizeof(struct UdpHeader) + sizeof(struct DnsHeader));
-
+    start = (buffer2 + sizeof(struct IPHeader) + sizeof(struct UdpHeader) + sizeof(struct DnsHeader));
 
     src_ip.s_addr = ip2->iph_sourceip;
     dest_ip.s_addr = ip2->iph_destip;
-    printf("The response contains : \n");
-    printf("Ip header source IP: %s\n", inet_ntoa(src_ip));
-    printf("Ip header dest IP: %s\n", inet_ntoa(dest_ip));
-    printf("Ip length: %d\n", ntohs(ip2->iph_len));
-    printf("Udp header srcport: %d\n", ntohs(udp2->udph_srcport));
-    printf("Udp header destport: %d\n", ntohs(udp2->udph_destport));
-    printf("Udp header length: %d\n", ntohs(udp2->udph_len));
-    printf("%d Questions. \n", ntohs(dns2->QDCOUNT));
-    printf("%d Answers. \n", ntohs(dns2->ANCOUNT));
 
     // read qustions
-    char token[64];
     // parse from qname.
     while (ntohs(dns2->QDCOUNT)) {
         unsigned char qlen = start[0];
@@ -57,7 +49,6 @@ void read_dns(int tun_fd, char *tun_name) {
         start++; // skip qlen.
         memcpy(token, start, qlen);
         token[qlen] = '\0';
-//        printf("qlen %d, token %s\n", qlen, token);
         start += qlen;
     }
 
@@ -86,6 +77,17 @@ void read_dns(int tun_fd, char *tun_name) {
         }
         reader = reader + ntohs(answers[i].answer->length);
     }
+
+    printf("Read %d bytes from device %s\n", nread, tun_name);
+    printf("The response contains : \n");
+    printf("Ip header source IP: %s\n", inet_ntoa(src_ip));
+    printf("Ip header dest IP: %s\n", inet_ntoa(dest_ip));
+    printf("Ip length: %d\n", ntohs(ip2->iph_len));
+    printf("Udp header srcport: %d\n", ntohs(udp2->udph_srcport));
+    printf("Udp header destport: %d\n", ntohs(udp2->udph_destport));
+    printf("Udp header length: %d\n", ntohs(udp2->udph_len));
+    printf("%d Questions. \n", ntohs(dns2->QDCOUNT));
+    printf("%d Answers. \n", ntohs(dns2->ANCOUNT));
 
     // print answer_s
     printf("\n Answers Records: %d \n", ntohs(dns2->ANCOUNT));
