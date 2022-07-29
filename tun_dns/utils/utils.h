@@ -25,6 +25,7 @@
 //#define PCKT_LEN 256
 #define PCKT_LEN 1500
 
+#pragma pack(push, 1)
 struct IPHeader {
     unsigned char iph_ihl:4, iph_ver:4;
     unsigned char iph_tos;
@@ -38,14 +39,18 @@ struct IPHeader {
     unsigned int iph_sourceip;
     unsigned int iph_destip;
 };
+#pragma pack(pop)
 
+#pragma pack(push, 1)
 struct UdpHeader {
     unsigned short int udph_srcport;
     unsigned short int udph_destport;
     unsigned short int udph_len;
     unsigned short int udph_chksum;
 };
+#pragma pack(pop)
 
+#pragma pack(push, 1)
 struct DnsHeader {
     unsigned short int query_id;
     unsigned short int flags;
@@ -55,11 +60,15 @@ struct DnsHeader {
     unsigned short int ARCOUNT;
 };
 
+#pragma pack(pop)
 
+#pragma pack(push, 1)
 struct DnsQuestion {
     unsigned short int qtype;
     unsigned short int qclass;
 };
+#pragma pack(pop)
+
 #pragma pack(push, 1)
 struct DnsAnswer {
     unsigned short int type;
