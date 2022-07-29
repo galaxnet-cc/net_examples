@@ -54,7 +54,7 @@ void writetun(char *hostname, char *src_ip, char *dest_ip, int tun_fd, char *tun
     dnsq->qtype = htons(1);
     dnsq->qclass = htons(1);
 
-    nwrite = write(tun_fd, buffer, 1500);
+    nwrite = write(tun_fd, buffer, packetLength);
     if (nwrite < 0) {
         perror("Writing from interface");
     }

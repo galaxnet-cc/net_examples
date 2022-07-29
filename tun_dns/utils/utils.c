@@ -155,6 +155,7 @@ u_char* ReadName2(unsigned char* reader,unsigned char* buffer,int* count)
 // signal handler
 void sighandler(int signum) {
     printf("\n Caught signal %d,exit the program...\n",signum);
+    close(tun_fd);
     exit(1);
 }
 

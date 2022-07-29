@@ -75,6 +75,7 @@ struct RES_RECORD {
     unsigned char *rdata;
 };
 
+int tun_fd;
 
 int tun_alloc(char *dev, int flags);
 

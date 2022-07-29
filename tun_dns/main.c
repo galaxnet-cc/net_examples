@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
         printf("Usage: %s [dns server ip] [hostname]\n",argv[0]);
         return 1;
     }
-    int tun_fd;
+
     unsigned char* dns_server = argv[1];
     unsigned char* hostname = argv[2];
     unsigned char tun_name[128],tun_ip[128],dest_ip[128],snat_ip[128],src_ip[128];
